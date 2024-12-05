@@ -13,17 +13,19 @@ const list = useTemplateRef("ref-list"); // useTemplateRefでテンプレート�
 let observer = null;
 
 const fetchPosts = async () => {
-  if (isLoading.value || !hasMore.value) return; // isLoading追加で重複リクエスト防止
+  if (isLoading.value || !hasMore.value) return; // isLoadingを含めて重複リクエスト防止
 
   isLoading.value = true;
 
   try {
-    const response = await axios.get('https://jsonplaceholder.typicode.com/posts', {
+    const response = await axios.get('https://vool.jp/wp-json/wp/v2/posts', {
       params: {
-        _start: posts.value.length, // 既に取得済みのデータ数から開始
-        _limit: BATCH_SIZE, // 10件取得
+        offset: posts.value.length, // 既に取得済みのデータ数から開始
+        per_page: BATCH_SIZE, // 1回のリクエストで返すレコードの数を指定
       },
     });
+
+    console.log(response.data);
 
     if (response.data.length === 0) {
       hasMore.value = false;
@@ -82,9 +84,12 @@ onMounted(() => {
     <ul ref="ref-list" class="list">
       <TransitionGroup name="fade">
         <li v-for="post in posts" :key="post.id" class="item">
-          <p>ID：{{ post.id }}</p>
-          <p>タイトル：{{ post.title }}</p>
-          <p>コメント：{{ post.body }}</p>
+          <a :href="post.link" class="link" target="_blank" rel="noopener noreferrer">
+            <p>ID：{{ post.id }}</p>
+            <p>スラッグ：{{ post.slug }}</p>
+            <p>タイトル：{{ post.title.rendered }}</p>
+            <p v-html="post.excerpt.rendered"></p>
+          </a>
         </li>
       </TransitionGroup>
     </ul>
@@ -109,7 +114,10 @@ onMounted(() => {
   padding: 0;
 }
 
-.item {
+.link {
+  display: block;
+  text-decoration: none;
+  color: inherit;
   box-shadow: 5px 5px 8px rgb(0 0 0 / 0.2);
   border: 1px solid;
   border-radius: 8px;
