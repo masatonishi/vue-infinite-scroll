@@ -25,8 +25,6 @@ const fetchPosts = async () => {
       },
     });
 
-    console.log(response.data);
-
     if (response.data.length === 0) {
       hasMore.value = false;
 
