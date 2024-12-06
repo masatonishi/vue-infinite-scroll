@@ -17,6 +17,11 @@ const fetchPosts = async () => {
 
   isLoading.value = true;
 
+  // 初回以外の場合に遅延を設定
+  if (posts.value.length > 0) {
+    await new Promise(resolve => setTimeout(resolve, 500));
+  }
+
   try {
     const response = await axios.get('https://vool.jp/wp-json/wp/v2/posts', {
       params: {
